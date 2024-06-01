@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MicroPython Web Server</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #343a40;
+        }
+
+        .container {
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            width: 400px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 14px;
+            margin-bottom: 20px;
+            color: #6c757d;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        input[type="file"] {
+            display: block;
+            margin: 0 auto 10px auto;
+        }
+
+        input[type="submit"],
+        button {
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+
+        input[type="submit"]:hover,
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #loadingSpinner {
+            display: none;
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 16px solid #3498db;
+            width: 120px;
+            height: 120px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #fileContent {
+            margin-top: 20px;
+            white-space: pre-wrap;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            text-align: left;
+        }
+    </style>
+    <script>
+        function displayFileContent() {
+            var fileInput = document.getElementById('fileInput');
+            var file = fileInput.files[0];
+            var reader = new FileReader();
+
+            reader.onload = function(event) {
+                var fileContent = event.target.result;
+                document.getElementById('fileContent').innerText = fileContent;
+            };
+
+            reader.readAsText(file);
+        }
+
+        function uploadFile() {
+            var fileInput = document.getElementById('fileInput');
+            var file = fileInput.files[0];
+            var reader = new FileReader();
+
+            reader.onload = function(event) {
+                var fileContent = event.target.result;
+                var base64Content = btoa(fileContent);
+                var jsonPayload = JSON.stringify({
+                    filename: file.name,
+                    content: base64Content
+                });
+
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '/', true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+
+                xhr.onload = function () {
+                    document.getElementById('loadingSpinner').style.display = 'none';
+                    if (xhr.status === 200) {
+                        document.getElementById('fileContent').innerText = xhr.responseText;
+                        alert('File uploaded successfully!');
+                    } else {
+                        alert('File upload failed!');
+                    }
+                };
+
+                document.getElementById('loadingSpinner').style.display = 'block';
+                xhr.send(jsonPayload);
+            };
+
+            reader.readAsText(file);
+        }
+
+        function fetchTestFile() {
+            window.location.href = 'html/test.html';
+        }
+
+        function fetchStorageStats() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/storage', true);
+
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    alert(xhr.responseText);
+                } else {
+                    alert('Failed to fetch storage stats!');
+                }
+            };
+
+            xhr.send();
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Hello from MicroPython!</h1>
+        <p>This is a simple web server example.</p>
+        <form onsubmit="event.preventDefault(); uploadFile();">
+            <input type="file" id="fileInput" name="file" onchange="displayFileContent()">
+            <input type="submit" value="Upload">
+        </form>
+        <button onclick="fetchTestFile()">Fetch Test File Content</button>
+        <button onclick="fetchStorageStats()">Show Storage Stats</button>
+        <div id="loadingSpinner"></div>
+        <div id="fileContent"></div>
+    </div>
+</body>
+</html>

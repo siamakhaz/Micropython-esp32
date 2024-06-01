@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MotoTrak</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <base href="/">
+    <style>
+        :root {
+            --background-color: #fff;
+            --text-color: #333;
+            --input-background-color: #f5f5f5;
+            --border-color: #ddd;
+            --button-background-color: #4caf50;
+            --button-hover-color: #45a049;
+            --button-danger-background-color: #f44336;
+            --button-danger-hover-color: #e53935;
+            --button-warning-background-color: #ffc107;
+            --button-warning-hover-color: #ffb300;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background-color: #2c2c2c;
+                --text-color: #f0f0f0;
+                --input-background-color: #444;
+                --border-color: #555;
+                --button-background-color: #4caf50;
+                --button-hover-color: #45a049;
+                --button-danger-background-color: #f44336;
+                --button-danger-hover-color: #e53935;
+                --button-warning-background-color: #ffc107;
+                --button-warning-hover-color: #ffb300;
+            }
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+            background: var(--background-color);
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .left-panel, .right-panel {
+            flex: 1;
+            margin: 10px;
+        }
+
+        fieldset {
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        legend {
+            font-weight: 500;
+            color: var(--text-color);
+            padding: 0 10px;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: var(--text-color);
+        }
+
+        input[type="text"], button {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            width: calc(100% - 22px);
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            font-size: 14px;
+            background-color: var(--input-background-color);
+            color: var(--text-color);
+        }
+
+        button {
+            background-color: var(--button-background-color);
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: var(--button-hover-color);
+        }
+
+        .button-group button {
+            width: auto;
+            margin: 5px 5px 5px 0;
+            padding: 10px 20px;
+        }
+
+        .button-group button#stop {
+            background-color: var(--button-danger-background-color);
+        }
+
+        .button-group button#stop:hover {
+            background-color: var(--button-danger-hover-color);
+        }
+
+        .button-group button#pause {
+            background-color: var(--button-warning-background-color);
+        }
+
+        .button-group button#pause:hover {
+            background-color: var(--button-warning-hover-color);
+        }
+
+        .flex-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-item {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        #plot-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #plot-container img {
+            max-width: 100%;
+        }
+
+        h1 {
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <script src="/html/static/script.js"></script>
+    <div class="container">
+        <div class="left-panel">
+            <h1>MotoTrak</h1>
+            <form id="moto-form">
+                <!-- MotoTrak Connection Section -->
+                <fieldset>
+                    <legend>MotoTrak Connection</legend>
+                    <div>
+                        <label for="rat_id">Rat ID:</label>
+                        <input type="text" id="rat_id" name="rat_id">
+                    </div>
+                    <div class="flex-row">
+                        <div style="flex: 1; margin-right: 10px;">
+                            <label for="save_location">Save location (parent folder):</label>
+                            <input type="text" id="save_location" name="save_location">
+                        </div>
+                        <button type="button" id="browse">Browse</button>
+                    </div>
+                    <div class="flex-row">
+                        <div style="flex: 1; margin-right: 10px;">
+                            <label for="calibration_file">Calibration file location:</label>
+                            <input type="text" id="calibration_file" name="calibration_file" value="Calibration2">
+                        </div>
+                        <button type="button" id="change">Change</button>
+                    </div>
+                    <div class="flex-row">
+                        <button type="button" id="connect">Connect MotoTrak</button>
+                        <button type="button" id="retract">Retract Sensor at Pos</button>
+                    </div>
+                </fieldset>
+
+                <!-- Digital Output Section -->
+                <fieldset>
+                    <legend>Digital Output</legend>
+                    <div class="flex-row">
+                        <div>
+                            <input type="radio" id="stimulation" name="output" value="Stimulation" checked>
+                            <label for="stimulation">Stimulation</label>
+                        </div>
+                        <div>
+                            <input type="radio" id="behavioral" name="output" value="Behavioral Events">
+                            <label for="behavioral">Behavioral Events</label>
+                        </div>
+                    </div>
+                    <div id="stimulation-options">
+                        <div class="flex-row">
+                            <div>
+                                <input type="radio" id="random" name="stimulation_mode" value="Random" checked>
+                                <label for="random">Random</label>
+                            </div>
+                            <div>
+                                <input type="radio" id="conditional" name="stimulation_mode" value="Conditional">
+                                <label for="conditional">Conditional</label>
+                            </div>
+                            <div>
+                                <input type="radio" id="manual" name="stimulation_mode" value="Manual">
+                                <label for="manual">Manual</label>
+                            </div>
+                        </div>
+                        <button type="button" id="stimulate" style="margin-top: 10px;">Stimulation</button>
+                        <div class="flex-row">
+                            <div style="flex: 1; margin-right: 10px;">
+                                <label for="stime_rate">Stime Rate (%):</label>
+                                <input type="text" id="stime_rate" name="stime_rate">
+                            </div>
+                            <div style="flex: 1;">
+                                <label for="tolerance">Tolerance (deg):</label>
+                                <input type="text" id="tolerance" name="tolerance">
+                            </div>
+                        </div>
+                    </div>
+                    <div id="behavioral-options" style="display: none;">
+                        <div>
+                            <label for="initial_pulses">Initial pulses:</label>
+                            <input type="text" id="initial_pulses" name="initial_pulses">
+                        </div>
+                        <div>
+                            <label for="success_pulses">Success pulses:</label>
+                            <input type="text" id="success_pulses" name="success_pulses">
+                        </div>
+                        <div>
+                            <label for="failure_pulses">Failure pulses:</label>
+                            <input type="text" id="failure_pulses" name="failure_pulses">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Parameters Section -->
+                <fieldset>
+                    <legend>Parameters</legend>
+                    <div class="flex-row">
+                        <div style="flex: 1; margin-right: 10px;">
+                            <label for="hit_thresh">Hit thresh (deg):</label>
+                            <input type="text" id="hit_thresh" name="hit_thresh">
+                        </div>
+                        <div style="flex: 1;">
+                            <label for="adaptive" style="display: block;">Adaptive</label>
+                            <input type="checkbox" id="adaptive" name="adaptive">
+                        </div>
+                    </div>
+                    <div id="adaptive-options" style="display: none;">
+                        <div class="flex-row">
+                            <div style="flex: 1; margin-right: 10px;">
+                                <label for="min">Min:</label>
+                                <input type="text" id="min" name="min">
+                            </div>
+                            <div style="flex: 1;">
+                                <label for="max">Max:</label>
+                                <input type="text" id="max" name="max">
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="init_thresh">Init thresh (deg):</label>
+                        <input type="text" id="init_thresh" name="init_thresh">
+                    </div>
+                    <div class="flex-row">
+                        <div style="flex: 1; margin-right: 10px;">
+                            <label for="max_trials">Max Trials (num):</label>
+                            <input type="text" id="max_trials" name="max_trials" value="100">
+                        </div>
+                        <div style="flex: 1;">
+                            <label for="max_duration">Max Duration (min):</label>
+                            <input type="text" id="max_duration" name="max_duration" value="30">
+                        </div>
+                    </div>
+                    <div class="flex-row">
+                        <div style="flex: 1; margin-right: 10px;">
+                            <label for="sensor_pos">Sensor pos (cm):</label>
+                            <input type="text" id="sensor_pos" name="sensor_pos">
+                        </div>
+                        <div style="flex: 1;">
+                            <label for="hit_window">Hit window (s):</label>
+                            <input type="text" id="hit_window" name="hit_window">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="failure_tolerance">Failure Tolerance (deg):</label>
+                        <input type="text" id="failure_tolerance" name="failure_tolerance" value="10">
+                    </div>
+                    <button type="button" id="adjust">Adjust Lever Baseline</button>
+                    <div class="button-group">
+                        <button type="button" id="start">START</button>
+                        <button type="button" id="pause">PAUSE</button>
+                        <button type="button" id="stop">STOP</button>
+                        <button type="button" id="feed">FEED</button>
+                        <button type="button" id="reset">RESET</button>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+
+        <!-- Right Panel for Display -->
+        <div class="right-panel">
+            <div class="stat-item">
+                <label>Num Trials:</label>
+                <span id="num_trials">0</span>
+            </div>
+            <div class="stat-item">
+                <label>Median Peak:</label>
+                <span id="median_peak">0</span>
+            </div>
+            <div class="stat-item">
+                <label>Num Rewards:</label>
+                <span id="num_rewards">0</span>
+            </div>
+            <div class="stat-item">
+                <label>Pellets delivered:</label>
+                <span id="pellets_delivered">0 (0.000 g)</span>
+            </div>
+            <div class="stat-item">
+                <label>Num Stimulations:</label>
+                <span id="num_stimulations">0</span>
+            </div>
+            <div class="stat-item">
+                <label>Time elapsed:</label>
+                <span id="time_elapsed">00:00:00</span>
+            </div>
+            <div class="stat-item">
+                <label>Historical Hit Threshold:</label>
+                <input type="text" id="historical_ht">
+            </div>
+            <div id="plot-container">
+                <img id="plot" src="/html/static/plot.png" alt="Plot" onerror="handleImageError()">
+            </div>
+        </div>
+    </div>
+    <script>
+        function handleImageError() {
+            const plotContainer = document.getElementById('plot-container');
+            plotContainer.innerHTML = '<p>Plot image not found. Please check the file path.</p>';
+        }
+    </script>
+</body>
+</html>
