@@ -91,6 +91,7 @@ main.py.bak
 #Wifi Cred
 cred.json
 
-#VS code
+# VS Code workspace files
 *.code-workspace
+Micropython-esp32.code-workspace
 Micropython-esp32.code-workspace
