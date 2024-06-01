@@ -92,4 +92,4 @@ main.py.bak
 cred.json
 
 #VS code
-*girt.code-workspace
+*.code-workspace
