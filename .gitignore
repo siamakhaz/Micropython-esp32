@@ -93,3 +93,4 @@ cred.json
 
 #VS code
 *.code-workspace
+Micropython-esp32.code-workspace
